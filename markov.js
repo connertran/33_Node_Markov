@@ -10,10 +10,8 @@ class MarkovMachine {
   }
 
   // random pick array index
-  randomPick(arr) {
-    console.log(arr.length);
-    console.log(Math.floor(Math.random() * arr.length));
-    return Math.floor(Math.random() * arr.length);
+  static randomPick(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
   }
 
   /** set markov chains:
@@ -24,8 +22,9 @@ class MarkovMachine {
   makeChains() {
     let chains = new Map();
     for (let i = 0; i < this.words.length; i++) {
-      const word = this.words[i];
-      const nextWord = this.words[i + 1];
+      const word = this.words[i].toLowerCase();
+      const nextWord =
+        i === this.words.length - 1 ? null : this.words[i + 1].toLowerCase();
       if (chains.has(word)) {
         if (i === this.words.length - 1) {
           chains.get(word).push(null);
@@ -39,15 +38,25 @@ class MarkovMachine {
           chains.set(word, [nextWord]);
         }
       }
-      console.log(chains);
     }
+    this.chains = chains;
   }
 
   /** return random text from chains */
 
   makeText(numWords = 100) {
-    // TODO
+    // choose random key to start
+    let allKeys = Array.from(this.chains.keys());
+    let randomKey = MarkovMachine.randomPick(allKeys);
+    let output = [];
+    while (output.length < numWords && randomKey !== null) {
+      output.push(randomKey);
+      randomKey = MarkovMachine.randomPick(this.chains.get(randomKey));
+    }
+    return output.join(" ");
   }
 }
 
-let testing = new MarkovMachine(`the cat in the hat`);
+module.exports = {
+  MarkovMachine: MarkovMachine,
+};
